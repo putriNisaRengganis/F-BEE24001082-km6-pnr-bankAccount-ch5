@@ -1,0 +1,167 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "bank_system",
+    "dateExported": "2024-04-15T14:54:11.637Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "3ca5ef88-9a57-47dc-97eb-9492510e336d",
+            "name": "users",
+            "containerId": "",
+            "created": "2024-04-15T14:27:45.033Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "cc8c9b3d-8aa2-4efa-9b67-11acb30ef480",
+            "name": "bank_accounts",
+            "containerId": "",
+            "created": "2024-04-15T14:27:59.345Z",
+            "sortNum": 20000
+        },
+        {
+            "_id": "7ecc7756-636f-4df5-b8a1-e46279e2c470",
+            "name": "transaction",
+            "containerId": "",
+            "created": "2024-04-15T14:28:10.872Z",
+            "sortNum": 30000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "74e74f2d-f87e-4eff-b5b0-252d3b8991d5",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "7ecc7756-636f-4df5-b8a1-e46279e2c470",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/transactions",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-04-15T14:30:08.956Z",
+            "modified": "2024-04-15T14:41:47.707Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n \"source_account_id\": 3,\n \"destination_account_id\": 1,\n \"amount\": 20000\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "7e44d0a4-f358-4e5b-8823-204ff2d5c684",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "7ecc7756-636f-4df5-b8a1-e46279e2c470",
+            "name": "http://api/v1/users",
+            "url": "http://localhost:3000/api/v1/transactions/1",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2024-04-15T14:31:26.927Z",
+            "modified": "2024-04-15T14:51:06.735Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "7d5477d5-2c23-4870-bc25-71f42a654261",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "7ecc7756-636f-4df5-b8a1-e46279e2c470",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/transactions",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-04-15T14:33:09.677Z",
+            "modified": "2024-04-15T14:51:17.148Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "eb1af9b3-f699-4999-ad97-2501c03f0e9b",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "cc8c9b3d-8aa2-4efa-9b67-11acb30ef480",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/accounts/1",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2024-04-15T14:33:49.512Z",
+            "modified": "2024-04-15T14:33:49.512Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "bf3ed59c-c3b6-47f5-a996-0e695a601bcc",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "cc8c9b3d-8aa2-4efa-9b67-11acb30ef480",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/accounts",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2024-04-15T14:34:15.401Z",
+            "modified": "2024-04-15T14:34:15.401Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "d13b1e28-9081-4cce-adc7-4d5cfe409eb2",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "cc8c9b3d-8aa2-4efa-9b67-11acb30ef480",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/accounts",
+            "method": "POST",
+            "sortNum": 60000,
+            "created": "2024-04-15T14:35:27.202Z",
+            "modified": "2024-04-15T14:41:26.195Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n \"bank_name\": \"BNI\",\n \"bank_account_number\": \"0987654321\",\n \"ballance\": 400000,\n \"user_id\": 2\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "76c1df11-d76d-40a3-aabd-db51197ed846",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "3ca5ef88-9a57-47dc-97eb-9492510e336d",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/users",
+            "method": "POST",
+            "sortNum": 70000,
+            "created": "2024-04-15T14:37:10.694Z",
+            "modified": "2024-04-15T14:46:58.517Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "175eaad3-6d37-47f1-a630-f027f43d1d7d",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "3ca5ef88-9a57-47dc-97eb-9492510e336d",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/users",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2024-04-15T14:37:39.338Z",
+            "modified": "2024-04-15T14:45:37.802Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "a521bd34-f2c5-4f6b-b0bc-e15d7676b623",
+            "colId": "9a9b77e7-2683-4d28-88c6-44fe483dae98",
+            "containerId": "3ca5ef88-9a57-47dc-97eb-9492510e336d",
+            "name": "http://localhost:3000/api/v1/users",
+            "url": "http://localhost:3000/api/v1/users/1",
+            "method": "GET",
+            "sortNum": 90000,
+            "created": "2024-04-15T14:38:04.501Z",
+            "modified": "2024-04-15T14:46:43.673Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ]
+}

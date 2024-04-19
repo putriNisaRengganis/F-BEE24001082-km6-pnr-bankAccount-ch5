@@ -1,5 +1,7 @@
 import prisma from '../../../config/db.js'
 import crypto from 'crypto'
+import jsonWebtoken from 'jsonwebtoken'
+import { markAsUntransferable } from 'worker_threads'
 
 const getAll = async () => {
     return prisma.user.findMany()
@@ -87,4 +89,33 @@ const createWithProfile = async (data) => {
     })
 }
 
-export { getAll, getById, update, deleteData, create, createWithProfile}
+const login = async (email, password) => {
+    const hash = crypto.createHash('sha1');
+    const users = await prisma.user.findFirst({
+        where: {
+            email: email,
+        }
+    });
+
+    if (!users){
+        throw new Error("Inavlid email or password")
+    }
+    if (users.password !== hash.update (password).digest('hex')){
+        throw new Error ("invalid email or password")
+    }
+
+    delete users.password;
+
+    const token = jsonWebtoken.sign({
+        id: users.id,
+        email: users.email, 
+    }, process.env.JWT_SECRET_KEY,{
+        expiresIn: '1h'
+    });
+
+    return {
+        ...users,
+        token
+    }
+}
+export { getAll, getById, update, deleteData, create, createWithProfile,login}

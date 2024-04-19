@@ -1,0 +1,1547 @@
+openapi: 3.0.0
+info:
+  title: Users API
+  description: API for managing users
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+
+paths:
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User Login
+      description: Login as a user using the registeres email and password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login' 
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: User ID
+                      email:
+                        type: string
+                        description: User email address
+                      name:
+                        type: string
+                        description: User name
+                      token:
+                        type: string
+                        description: User token (not shown for security reasons)
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message ("Invalid email or password")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: User Registration
+      description: Registers a new user with name, email, password and profile information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration' 
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: User ID
+                      email:
+                        type: string
+                        description: User email address
+                      name:
+                        type: string
+                        description: User name
+                      password: 
+                        type: string
+                        description: User password (hashed value)
+                      profile:  
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: Profile ID
+                          identity_type:
+                            type: string
+                          identity_number:
+                            type: string
+                          address:
+                            type: string
+                            description: User address
+        '500':
+          description: User with email already exists (or other server error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message ("Email already exists")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /users:
+    get:
+      tags:
+        - Users Endpoint
+      summary: Get all users
+      description: Retrieves a list of all users in the system.
+      security:
+        - bearerAuth: []
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors
+    post:
+      tags:
+        - Users Endpoint
+      summary: Create a new user
+      description: Creates a new user.
+      security:
+        - bearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    description: User email address
+                  name:
+                    type: string
+                    description: User name
+                  password:
+                    type: string
+                    description: User Password
+                  profile:
+                    type: object
+                    properties:
+                      identity_number:
+                        type: string
+                      identity_type:
+                        type: string
+                      address:
+                        type: string
+                        description: user address
+      responses:
+        '201':  # Created status code
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                $ref: '#/components/schemas/UserWithProfile'
+        '401':  
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+  /users/{id}:
+    get:
+      tags:
+        - Users Endpoint
+      summary: Get user details by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: User ID
+
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message (e.g., "you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (usually null for errors)
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message (e.g., "User not found")
+                  data:
+                    type: object
+                    description: Empty object   
+    put:
+      tags:
+        - Users Endpoint
+      summary: Update user details
+      description: Updates the detail by ID.
+      security: 
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: User ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate' 
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'  
+        
+        '401': 
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+        '500':
+          description: Internal server error (record not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Record to update not found")
+                  data:
+                    type: object
+                    description: Data (optional - can include details)
+    delete:
+      tags:
+        - Users Endpoint
+      summary: Delete a user
+      description: Deletes a specific user identified by their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: User ID
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: User ID
+                      email:
+                        type: string
+                        description: User email address
+                      name:
+                        type: string
+                        description: User name
+                      password:
+                        type: string
+                        description: User Password
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message (e.g., "you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message (e.g., "Record to delete not found")
+                  data:
+                    type: object
+                    description: Data (optional - can include details)
+  /profiles:
+    get:
+      tags:
+        - Profiles Endpoint
+      summary: Get all Profiles
+      description: Retrieves a list of all profiles in the system.
+      security:
+        - bearerAuth: []
+
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Profile'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+    post:
+      tags:
+        - Profiles Endpoint
+      summary: Create a new profiles
+      description: Creates a new profiles.
+      security:
+        - bearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  identity_number:
+                    type: string
+                  identity_type:
+                    type: string
+                  address:
+                    type: string
+                    description: user address
+                  user_id:
+                    type: number
+                    description: User id
+      responses:
+        '201':
+          description: profiles created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                 message:
+                  type: string
+                 data:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      description: Profile id
+                    identity_type:
+                      type: string
+                    identity_number:
+                      type: string
+                    address:
+                      type: string
+                    user_id:
+                      type: number
+                  
+                
+        '401':  
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+  /profiles/{id}:
+    get:
+      tags:
+        - Profiles Endpoint
+      summary: Get profile details by ID
+      description: Retrieves details by ID.
+      security: 
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Profile ID
+      responses:
+        '200': 
+          description: Profile found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id: 
+                        type: number
+                        description: Profile id
+                      identity_type:
+                        type: string
+                      identity_number:
+                        type: string
+                      address:
+                        type: string
+                        description: user address
+                      user_id:
+                        type: number
+                        description: user id
+                      user:
+                        type: object
+                        description: user data
+                        properties:
+                          id:
+                            type: number
+                          email:
+                            type: string
+                          name:
+                            type: string
+                          password:
+                            type: string
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
+                  data:
+                    type: object
+                    description: Data (optional)
+    put:
+      tags:
+        - Profiles Endpoint
+      summary: Update profile details
+      description: Updates the details of a specific profile by ID.
+      security: 
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Profile ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+      responses:
+        '200': 
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id: 
+                        type: number
+                        description: Profile id
+                      identity_type:
+                        type: string
+                      identity_number:
+                        type: string
+                      address:
+                        type: string
+                        description: user address
+                      user_id:
+                        type: number
+                        description: user id  
+                
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+        '500':
+          description: Internal server error (record not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Record to update not found")
+                  data:
+                    type: object
+                    description: Data (optional - can include details)
+    delete:
+      tags:
+      - Profiles Endpoint
+      summary: Delete a profile
+      description: Deletes a specific profile identified by their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Profile ID
+      responses:
+        '200':
+          description: Profile deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id: 
+                        type: number
+                        description: Profile id
+                      identity_type:
+                        type: string
+                      identity_number:
+                        type: string
+                      address:
+                        type: string
+                        description: user address
+                      user_id:
+                        type: number
+                        description: user id  
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '500':
+          description: Internal server error (record not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Record to delete not found")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /accounts:
+    get: 
+      tags:
+        - Accounts Endpoint
+      summary: Get all bank accounts
+      description: Retrieves a list of all bank accounts in the system.
+      security: 
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All bank accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Account'
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+    post:
+      tags:
+        - Accounts Endpoint
+      summary: Create a new bank account
+      description: Creates a new bank account for a user.
+      security:
+        - bearerAuth: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreate' 
+      responses:
+        '201':
+          description: Bank account created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    $ref: '#/components/schemas/AccountWithoutUser' 
+        '401': 
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '500':
+          description: Internal server error (foreign key constraint failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Foreign key constraint failed")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /accounts/{id}:
+    get:
+      tags:
+        - Accounts Endpoint
+      summary: Get a bank account by ID
+      description: Retrieves details of a specific bank account by ID.
+      security:  
+        - bearerAuth: [] 
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Bank account ID
+      responses:
+        '200':
+          description: Bank account found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    $ref: '#/components/schemas/Account'
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+        '404':
+          description: Bank account not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message ("Bank Account not found")
+                  data:
+                    type: object
+                    description: Data (optional)
+    put:
+      tags:
+        - Accounts Endpoint
+      summary: Update a bank account
+      description: Updates the details of a specific bank account identified by their ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Bank account ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountUpdate'
+      responses:
+        '200':
+          description: Bank account updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    $ref: '#/components/schemas/AccountWithoutUser'
+        '401': 
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+        '500':
+          description: Internal server error (record not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Record to update not found")
+                  data:
+                    type: object
+                    description: Data (optional)
+    delete:
+      tags:
+        - Accounts Endpoint
+      summary: Delete a bank account
+      description: Deletes a specific bank account identified by ID.
+      security: 
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Bank account ID
+      responses:
+        '200':
+          description: Bank account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    $ref: '#/components/schemas/AccountWithoutUser'
+        '401': 
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '500':
+          description: Internal server error (record not found)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Specific error message ("Record to delete not found")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /transactions:
+    get:
+      tags:
+        - Transactions Endpoint
+      summary: Get all transactions
+      description: Retrieves a list of all transactions in the system.
+      security: 
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Transaction ID
+                        source_account_id:
+                          type: integer
+                          description: Source account ID (foreign key)
+                        destination_account_id:
+                          type: integer
+                          description: Destination account ID (foreign key)
+                        amount:
+                          type: number
+                          description: Transaction amount
+                        source:  
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              description: Source account ID
+                            bank_name:
+                              type: string
+                              description: Bank name
+                            bank_account_number:
+                              type: string
+                              description: Bank account number
+                            balance:
+                              type: number
+                              description: Source account balance
+                            user_id:
+                              type: integer
+                              description: User ID (foreign key)
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null)
+    post:
+      tags:
+        - Transactions Endpoint
+      summary: Create a new transaction
+      description: Creates a new transaction between two bank accounts.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreate'
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: Transaction ID
+                      source_account_id:
+                        type: integer
+                        description: Source account ID (foreign key)
+                      destination_account_id:
+                        type: integer
+                        description: Destination account ID (foreign key)
+                      amount:
+                        type: number
+                        description: Transaction amount
+        '500':
+          description: Insufficient balance (or other server error)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message (example; "Insufficient balance")
+                  data:
+                    type: object
+                    description: Data (optional)
+  /transactions/{id}:
+    get:
+      tags:
+        - Transactions Endpoint
+      summary: Get a transaction by ID
+      description: Retrieves details of a specific transaction by ID.
+      security:  
+        - bearerAuth: [] 
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            description: Transaction ID
+      responses:
+        '200':
+          description: Transaction found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Response message
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: Transaction ID
+                      source_account_id:
+                        type: integer
+                        description: Source account ID (foreign key)
+                      destination_account_id:
+                        type: integer
+                        description: Destination account ID (foreign key)
+                      amount:
+                        type: number
+                        description: Transaction amount
+                      source:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: Source account ID
+                          bank_name:
+                            type: string
+                            description: Bank name
+                          bank_account_number:
+                            type: string
+                            description: Bank account number
+                          balance:
+                            type: number
+                            description: Source account balance
+                          user_id:
+                            type: integer
+                            description: User ID (foreign key)
+                      destination:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            description: Destination account ID
+                          bank_name:
+                            type: string
+                            description: Bank name
+                          bank_account_number:
+                            type: string
+                            description: Bank account number
+                          balance:
+                            type: number
+                            description: Destination account balance
+                          user_id:
+                            type: integer
+                            description: User ID (foreign key)
+        '401':
+          description: Unauthorized access (if using bearer token authentication)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Status of the response (false in this case)
+                  message:
+                    type: string
+                    description: Error message ("you're not authorized!")
+                  data:
+                    type: object
+                    description: Data (null for errors)
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message (Transaction not found")
+                  data:
+                    type: object
+                    description: Data (optional)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 1
+        email:
+          type: string
+          description: User email address
+          example: putrinisarengganis@gmail.com
+        name:
+          type: string
+          description: User name
+          example: Putri Nisa Rengganis
+        password:
+          type: string
+          description: User Password
+          example: 659204
+    UserWithProfile:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+              id:
+                type: number
+                description: User id
+              email:
+                type: string
+                description: User email address
+                example: putrinisarengganis@gmail.com
+              name:
+                type: string
+                description: User name
+                example: Putri Nisa Rengganis
+              password:
+                type: string
+                description: User Password
+                example: 659204
+              profile:
+                type: object
+                properties:
+                  identity_number:
+                    type: string
+                    example: 123456789
+                  identity_type:
+                    type: string
+                    example: type3
+                  address:
+                    type: string
+                    description: user address
+                    example: Sumedang
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Putri Nisa Rengganis
+        email:
+          type: string
+          example: putrinisarengganis@gmail.com
+        password:
+          type: string
+          example: 659204
+    Profile:
+      type: object
+      properties:
+        id: 
+          type: number
+          description: Profile id
+          example: 1
+        identity_type:
+          type: string
+          example: type3
+        identity_number:
+          type: string
+          example: 123456789
+        address:
+          type: string
+          description: user address
+          example: Sumedang
+        user_id:
+          type: number
+          description: user id
+          example: 1
+        user:
+          type: object
+          description: user data
+          properties:
+            id:
+              type: number
+              example: 1
+            email:
+              type: string
+              example: putrinisarengganis@gmail.com
+            name:
+              type: string
+              example: Putri Nisa Rengganis
+            password:
+              type: string
+              example: 659204
+    ProfileUpdate:
+      type: object
+      properties:
+        identity_type:
+          type: string
+          description: Profile identity type
+          example: type2
+        identity_number:
+          type: string
+          description: Profile identity number
+          example: 123456789
+        address:
+          type: string
+          description: Profile address
+          example: Sumedang
+        user_id:
+          type: integer
+          description: User ID (foreign key)
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Bank account ID
+          example: 1
+        bank_name:
+          type: string
+          description: Bank name
+          example: 1
+        bank_account_number:
+          type: string
+          description: Bank account number
+          example: 12345678
+        balance:
+          type: number
+          description: Bank account balance
+          example: 1
+        user_id:
+          type: integer
+          description: User ID (foreign key)
+          example: 1
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: User ID
+              example: 1
+            email:
+              type: string
+              description: User email address
+              example: putrinisarengganis@gmail.com
+            name:
+              type: string
+              description: User name
+              example: Putri Nisa Rengganis
+            password:
+              type: string
+              description: User password
+              example: 659204
+    AccountWithoutUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Bank account ID
+          example: 1
+        bank_name:
+          type: string
+          description: Bank name
+          example: BRI
+        bank_account_number:
+          type: string
+          description: Bank account number
+          example: 12345678
+        balance:
+          type: number
+          description: Bank account balance
+          example: 350000
+        user_id:
+          type: integer
+          description: User ID (foreign key)
+          example: 1
+    AccountCreate:
+      type: object
+      required:
+        - bank_name 
+        - bank_account_number
+        - balance
+        - user_id
+      properties:
+        bank_name:
+          type: string
+          description: Bank name
+          example: BRI
+        bank_account_number:
+          type: string
+          description: Bank account number
+          example: 12345678
+        balance:
+          type: number
+          description: Bank account balance
+          example: 500000
+        user_id:
+          type: integer
+          description: User ID (foreign key)
+          example: 1
+    AccountUpdate: 
+      type: object
+      required:
+        - bank_name 
+        - bank_account_number
+        - balance
+        - user_id
+      properties:
+        bank_name:
+          type: string
+          description: Bank name
+          example: BRI
+        bank_account_number:
+          type: string
+          description: Bank account number
+          example: 12345678
+        balance:
+          type: number
+          description: Bank account balance
+          example: 200000
+        user_id:
+          type: integer
+          description: User ID (foreign key)
+    TransactionCreate: 
+      type: object
+      required:
+        - source_account_id
+        - destination_account_id
+        - amount
+      properties:
+        source_account_id:
+          type: integer
+          description: Source account ID (foreign key)
+          example: 1
+        destination_account_id:
+          type: integer
+          description: Destination account ID (foreign key)
+          example: 1
+        amount:
+          type: number
+          description: Transaction amount
+          example: 350000
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: putrinisarengganis@gmail.com
+        password:
+          type: string
+          description: User password (secure storage recommended)
+          example: 659204
+    UserRegistration:
+      type: object
+      required:
+        - name  
+        - email
+        - password
+        - profile
+      properties:
+        name:
+          type: string
+          description: User name
+          example: Putri Nisa Rengganis
+        email:
+          type: string
+          description: User email address
+          example: putrinisarengganis@gmail.com
+        password:
+          type: string
+          description: User password
+          example: 659204
+        profile:
+          type: object
+          required:
+            - identity_type 
+            - identity_number
+            - address
+          properties:
+            identity_type:
+              type: string
+              description: Identity type (e.g., KTP, Passport)
+              example: type3
+            identity_number:
+              type: string
+              description: Identity number
+              example: 123456789
+            address:
+              type: string
+              description: User address
+              example: Sumedang

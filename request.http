@@ -2,12 +2,12 @@
 POST http://localhost:3000/api/v1/users
 
 {
-  "email": "putrinisarengganis@gmail.com",
-  "name": "Putri Nisa Rengganis",
-  "password": "659204",
+  "email": "ochi@gmail.com",
+  "name": "ochi",
+  "password": "1234",
   "profile": {
     "identity_type": "type3",
-    "identity_number": "123456789",
+    "identity_number": "34567",
     "address": "Sumedang"
   }
 }
@@ -36,6 +36,7 @@ GET http://localhost:3000/api/v1/accounts/1
 
 ### POST/api/v1/transactions
 POST http://localhost:3000/api/v1/transactions
+
 {
  "source_account_id": 1,
  "destination_account_id": 1,
@@ -46,6 +47,5 @@ POST http://localhost:3000/api/v1/transactions
 GET http://localhost:3000/api/v1/transactions
 
 ### GET/api/v1/transactions/:transaction
-GET 
-http://localhost:3000/api/v1/transactions/1
+GET http://localhost:3000/api/v1/transactions/1
 

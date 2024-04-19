@@ -1,4 +1,4 @@
-import { getById, getAll, update, deleteData, create, createWithProfile } from "./service.js";
+import { getById, getAll, update, deleteData, create, createWithProfile,login } from "./service.js";
 import response from "../helper/response.js";
 
 const getAllUsers = async (req, res) => {
@@ -65,4 +65,32 @@ const createUserWithProfile = async (req, res) => {
     }
 }
 
-export { getAllUsers, getUserById, updateUser, deleteUser, createUser, createUserWithProfile };
+const userLogin = async (req, res) => {
+    const {email, password} = req.body;
+    try{
+        const user = await login(email, password);
+        response (res, 200, "User Logged in", user);
+    }catch (error){
+        if (error.message === "Invalid email or password"){
+            response(res, 401, error.message, {});
+        }else{
+            response(res, 500, error.message, {});
+        }
+    }
+}
+
+const testVerifyToken = async (req, res) => {
+    const { authorization } = req.headers;
+
+    try{
+        const user = await testVerifyToken(authorization);
+        response(res, 200, "User logged in", user)
+    } catch{
+        if (error.message === "Invalid Token"){
+            response(res, 401, "Invalid Token", {});
+        }else {
+            response(res, 500, error.messsage, {});
+        }
+    }
+}
+export { getAllUsers, getUserById, updateUser, deleteUser, createUser, createUserWithProfile,userLogin, testVerifyToken };
